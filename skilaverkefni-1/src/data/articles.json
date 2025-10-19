@@ -1,0 +1,14 @@
+[
+  {
+    "id": "a02a8897-b3b9-40d1-9b3a-e0010fd6454f",
+    "title": "Learning TypeScript",
+    "content": "TypeScript adds static typing to JavaScript...",
+    "authorId": "8cb5070c-a1be-42a6-969b-51e3bfe69bcc"
+  },
+  {
+    "id": "efe45ccf-6996-431d-8d75-535861363bef",
+    "title": "Learning JavaScript",
+    "content": "JavaScript is the most popular language on the browser",
+    "authorId": "8cb5070c-a1be-42a6-969b-51e3bfe69bcc"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "8cb5070c-a1be-42a6-969b-51e3bfe69bcc",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "bio": "Software developer and writer"
+  },
+  {
+    "id": "1c02e777-0d34-419d-9219-71e139a3b770",
+    "name": "jon gunnar",
+    "email": "jonkarls04@icloud.com",
+    "bio": "gerir geggjud skilaverkefni 100%"
+  },
+  {
+    "id": "0fd9de0a-2b55-471a-bfd4-fd880b626c7d",
+    "name": "helgasifeliasdottir",
+    "email": "jonkarls04@icloud.com",
+    "bio": "besta kaerasta i heimi"
+  },
+  {
+    "id": "1f73bae8-4cb5-453a-9680-ea24cd74f982",
+    "name": "katrin greta",
+    "email": "jonkarls04@icloud.com",
+    "bio": "systir min sem er sma baller"
+  }
+]
