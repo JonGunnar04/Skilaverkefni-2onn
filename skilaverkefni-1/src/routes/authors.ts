@@ -106,29 +106,15 @@ router.get(
 router.post(
   '/',
   validate(createAuthorRequest),
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { author } = req.body;
-      await createNewAuthorAsync(author.name, author.email, author.bio);
+      const { name, email, bio } = req.body;
+      const created = await createNewAuthorAsync(name, email, bio);
 
-      res.status(201).json({ author });
-    } catch {
-      res.status(400).json({
-        error: {
-          status: 400,
-          message: 'Validation failed',
-          details: [
-            {
-              field: 'name',
-              message: 'Name is required',
-            },
-            {
-              field: 'email',
-              message: 'Invalid email format',
-            },
-          ],
-        },
-      });
+      res.status(201).json({ created });
+    } catch(err) {
+      console.log(err)
+      next(err);
     }
   }
 );

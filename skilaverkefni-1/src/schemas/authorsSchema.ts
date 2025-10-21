@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const createAuthorRequest = z.object({
-  name: z.string().min(1).max(100, 'Maximum of 100 letters'),
+  name: z.string().min(1).max(100, 'Maximum of 100 letters!'),
   email: z.string().email('Invalid Email!'),
   bio: z.string().optional(),
 });

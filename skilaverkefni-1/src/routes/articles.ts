@@ -79,34 +79,23 @@ router.post(
   validate(createArticleRequest),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('hallo jon gunna1')
-
-      const { article } = req.body;
-       console.log('hallo jon gunnar2')
-
-      await createNewArticleAsync(article.title, article.content, article.authorId);
-      console.log('hallo jon gunnar3')
-
+      const { title, content, authorId } = req.body;
+      const created = await createNewArticleAsync(title, content, authorId);
       const authors = await loadAllAuthorsAsync(authorsFilePath);
-      console.log('hallo jon gunnar4')
       const author = authors.find((authors) => {
-        return authors.id === article.authorId;
+        return authors.id === authorId;
       });
-      console.log('hallo jon gunnar5')
 
       if (!author) {
         res.status(400).json({
-          "authorId": "must be assigned to an existing author"
+          authorId: 'must be assigned to an existing author',
         });
         return;
       }
-
-      console.log('hello')
-
       res.status(201).json({
-        article,
+        created,
       });
-    } catch(err) {
+    } catch (err) {
       next(err);
     }
   }
