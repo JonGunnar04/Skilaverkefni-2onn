@@ -20,15 +20,6 @@ const router = express.Router();
 const articlesFilePath = path.join(__dirname, '../data/articles.json');
 const authorsFilePath = path.join(__dirname, '../data/authors.json');
 
-/*
-router.get('/', async (req: Request, res: Response) => {
-  res.json({ success: true, message: 'Articles fetched successfully' });
-});
-
-router.get('/:id', async (req: Request, res: Response) => {
-  res.json({ success: true, message: 'Article fetched successfully' });
-});
-*/
 
 // Get all articles
 
@@ -71,8 +62,8 @@ router.get(
   }
 );
 
+
 // Post, create a new article
-// NEED TO TEST THIS AFTER FINISHING THE AUTHOR ROUTES
 
 router.post(
   '/',
@@ -93,13 +84,14 @@ router.post(
         return;
       }
       res.status(201).json({
-        created,
+        created
       });
     } catch (err) {
       next(err);
     }
   }
 );
+
 
 // Delete an article
 

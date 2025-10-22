@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const createArticleRequest = z.object({
-  title: z.string().max(100, 'Maximum of 100 letters!'),
-  content: z.string().min(10, 'Minimum of 10 letters!'),
+  title: z.string().min(1, 'Title is required').max(100, 'Maximum of 100 letters!'),
+  content: z.string().min(10, 'Content must be atleast 10 characters'),
   authorId: z
     .string()
     .regex(
