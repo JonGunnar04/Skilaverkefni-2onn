@@ -460,11 +460,11 @@ LIMIT 5;
 -- Album title, release year, rating, all artist names as one comma-separated string,
 -- and all genre names as one comma-separated string
 SELECT 
-  a.title,
-  a.release_year,
-  a.rating,
-  STRING_AGG(DISTINCT ar.name, ', ') AS artists,
-  STRING_AGG(DISTINCT g.name, ', ') AS genres
+a.title,
+a.release_year,
+a.rating,
+STRING_AGG(DISTINCT ar.name, ', ') AS artists,
+STRING_AGG(DISTINCT g.name, ', ') AS genres
 FROM albums a
 JOIN album_artists aa ON aa.album_id = a.id
 JOIN artists ar ON ar.id = aa.artist_id
@@ -479,28 +479,65 @@ LIMIT 10;
 -- Find all albums by The Beatles (or another artist of your choice)
 -- Show the artist name, album title, release year, and rating
 -- Sort chronologically by release year
-
+SELECT 
+ar.name AS artist_name,
+a.title AS album_title,
+a.release_year,
+a.rating
+FROM artists ar
+JOIN album_artists aa ON aa.artist_id = ar.id
+JOIN albums a ON a.id = aa.album_id
+WHERE ar.name = 'The Beatles'
+ORDER BY a.release_year;
 
 
 -- Exercise 7.3: Songs from an album
 -- Display all songs from the album "Abbey Road" (or another album of your choice)
 -- Show the song title, track number, and duration in seconds
 -- Sort by track number
-
+SELECT 
+s.title AS song_title,
+s.track_number,
+s.duration_seconds
+FROM songs s
+JOIN albums a ON a.id = s.album_id
+WHERE a.title = 'Abbey Road'
+ORDER BY s.track_number;
 
 
 -- Exercise 7.4: Albums in a specific genre
 -- Find all Rock albums (or another genre of your choice)
 -- Display the album title, release year, artist name, and rating
 -- Sort by highest rating first
-
+SELECT 
+a.title AS album_title,
+a.release_year,
+ar.name AS artist_name,
+a.rating
+FROM albums a
+JOIN album_artists aa ON aa.album_id = a.id
+JOIN artists ar ON ar.id = aa.artist_id
+JOIN album_genres ag ON ag.album_id = a.id
+JOIN genres g ON g.id = ag.genre_id
+WHERE g.name = 'Rock'
+ORDER BY a.rating DESC;
 
 
 -- Exercise 7.5: Artists who work in multiple genres
 -- Which artists have albums in 2 or more different genres?
 -- Show the artist name and count of distinct genres they work in
 -- Sort by artists with the most genre diversity first
-
+SELECT 
+ar.name AS artist_name,
+COUNT(DISTINCT g.id) AS genre_count
+FROM artists ar
+JOIN album_artists aa ON aa.artist_id = ar.id
+JOIN albums a ON a.id = aa.album_id
+JOIN album_genres ag ON ag.album_id = a.id
+JOIN genres g ON g.id = ag.genre_id
+GROUP BY ar.id
+HAVING COUNT(DISTINCT g.id) >= 2
+ORDER BY genre_count DESC;
 
 
 -- ============================================
@@ -511,35 +548,75 @@ LIMIT 10;
 -- For each genre, show the genre name, average album rating (2 decimals),
 -- and count of albums in that genre
 -- Sort by highest average rating first
-
+SELECT
+g.name AS genre_name,
+ROUND(AVG(a.rating), 2) AS avg_rating,
+COUNT(DISTINCT a.id) AS album_count
+FROM genres g
+JOIN album_genres ag ON ag.genre_id = g.id
+JOIN albums a ON a.id = ag.album_id
+GROUP BY g.id, g.name
+ORDER BY avg_rating DESC;
 
 
 -- Exercise 8.2: Most prolific artists
 -- Find the 10 artists who have released the most albums
 -- Show the artist name, how many albums they have, and their average album rating
 -- Sort by most albums first
-
+SELECT
+ar.name AS artist_name,
+COUNT(DISTINCT a.id) AS album_count,
+ROUND(AVG(a.rating), 2) AS avg_album_rating
+FROM artists ar
+JOIN album_artists aa ON aa.artist_id = ar.id
+JOIN albums a ON a.id = aa.album_id
+GROUP BY ar.id, ar.name
+ORDER BY album_count DESC, artist_name
+LIMIT 10;
 
 
 -- Exercise 8.3: Albums with review statistics
 -- For albums that have reviews, show the album title, average review rating (2 decimals),
 -- and count of reviews
 -- Show the top 10 by average review rating
-
+SELECT
+a.title AS album_title,
+ROUND(AVG(r.rating), 2) AS avg_review_rating,
+COUNT(r.id) AS review_count
+FROM albums a
+JOIN reviews r ON r.album_id = a.id
+GROUP BY a.id, a.title
+ORDER BY avg_review_rating DESC, review_count DESC
+LIMIT 10;
 
 
 -- Exercise 8.4: Total sales by artist
 -- Calculate the total sales across all albums for each artist
 -- Show the artist name, total sales in millions, and number of albums
 -- Sort by highest total sales first
-
+SELECT
+ar.name AS artist_name,
+ROUND(SUM(a.sales_millions), 2) AS total_sales_millions,
+COUNT(DISTINCT a.id) AS album_count
+FROM artists ar
+JOIN album_artists aa ON aa.artist_id = ar.id
+JOIN albums a ON a.id = aa.album_id
+GROUP BY ar.id, ar.name
+ORDER BY total_sales_millions DESC, album_count DESC;
 
 
 -- Exercise 8.5: Decade analysis
 -- For each decade (1960s, 1970s, etc.), calculate:
 -- The decade, count of albums released, average rating, and total sales
 -- Sort by most recent decade first
-
+SELECT
+FLOOR(a.release_year / 10) * 10 AS decade,
+COUNT(*) AS albums_released,
+ROUND(AVG(a.rating), 2) AS avg_rating,
+ROUND(SUM(a.sales_millions), 2) AS total_sales_millions
+FROM albums a
+GROUP BY decade
+ORDER BY decade DESC;
 
 
 -- ============================================
@@ -550,34 +627,81 @@ LIMIT 10;
 -- Find albums that have both a high rating (8.0 or higher) AND at least 10 songs
 -- Show the album title, rating, song count, and artist name
 -- Sort by highest rating first
-
+SELECT
+a.title AS album_title,
+a.rating,
+COUNT(DISTINCT s.id) AS song_count,
+STRING_AGG(DISTINCT ar.name, ', ') AS artist_name
+FROM albums a
+LEFT JOIN songs s ON s.album_id = a.id
+JOIN album_artists aa ON aa.album_id = a.id
+JOIN artists ar ON ar.id = aa.artist_id
+GROUP BY a.id, a.title, a.rating
+HAVING a.rating >= 8.0 AND COUNT(DISTINCT s.id) >= 3
+ORDER BY a.rating DESC, song_count DESC;
 
 
 -- Exercise 9.2: Artists with no albums in certain genres
 -- Find all artists who have never released a Pop album (or choose another genre)
 -- Show just the artist names
-
+SELECT ar.name
+FROM artists ar
+WHERE NOT EXISTS (
+SELECT 1
+FROM album_artists aa
+JOIN albums a ON a.id = aa.album_id
+JOIN album_genres ag ON ag.album_id = a.id
+JOIN genres g ON g.id = ag.genre_id
+WHERE aa.artist_id = ar.id
+AND g.name = 'Pop'
+);
 
 
 -- Exercise 9.3: Albums with above-average ratings
 -- Find all albums that have a rating higher than the average across all albums
 -- Show the title, rating, and how much higher it is than average (as "difference")
 -- Sort by highest rating first
-
+WITH avg_all AS (
+  SELECT AVG(rating) AS avg_rating FROM albums
+)
+SELECT
+a.title,
+a.rating,
+ROUND(a.rating - avg_all.avg_rating, 2) AS difference
+FROM albums a, avg_all
+WHERE a.rating > avg_all.avg_rating
+ORDER BY a.rating DESC, a.title;
 
 
 -- Exercise 9.4: Most reviewed albums
 -- Which albums have received the most reviews?
 -- Show the album title, count of reviews, and average review rating
 -- Show the top 10
-
+SELECT
+a.title AS album_title,
+COUNT(r.id) AS review_count,
+ROUND(AVG(r.rating), 2) AS avg_review_rating
+FROM albums a
+JOIN reviews r ON r.album_id = a.id
+GROUP BY a.id, a.title
+ORDER BY review_count DESC, avg_review_rating DESC
+LIMIT 10;
 
 
 -- Exercise 9.5: Genre popularity by decade
 -- For albums released in the 2010s (2010-2019), which genre was most popular?
 -- Show the genre name, count of albums, and average rating
 -- Sort by most albums first
-
+SELECT
+g.name AS genre_name,
+COUNT(DISTINCT a.id) AS album_count,
+ROUND(AVG(a.rating), 2) AS avg_rating
+FROM genres g
+JOIN album_genres ag ON ag.genre_id = g.id
+JOIN albums a ON a.id = ag.album_id
+WHERE a.release_year BETWEEN 2010 AND 2019
+GROUP BY g.id, g.name
+ORDER BY album_count DESC, avg_rating DESC;
 
 
 -- ============================================
