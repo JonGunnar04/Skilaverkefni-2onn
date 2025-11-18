@@ -15,12 +15,25 @@ export const getAllCuisines = async (): Promise<Cuisine[]> => {
   }
 };
 
+export const getCuisineById = async (id: string): Promise<Cuisine[]> => {
+  try {
+    const result = await pool.query(`SELECT * FROM cuisines WHERE id = ${id}`);
+    console.log('Recipes fetched from database:', result);
+    return result;
+  } catch (err) {
+    throw new Error('Error loading cuisine by ID' + err);
+  }
+};
+
 // GET recipes by cuisines
 export const getRecipesByCuisines = async (id: string): Promise<Cuisine[]> => {
   try {
     const result = await pool.query(
       `SELECT * FROM recipes WHERE cuisine_id = ${id};`
     );
+    if (!result) {
+      console.log('no result wsas found');
+    }
     console.log('Recipes by Cuisines fetched from database:', result);
     return result;
   } catch (err) {
@@ -37,7 +50,7 @@ export const createCuisine = async (name: string): Promise<Cuisine[]> => {
     console.log('Created a Cuisine successfully:', result);
     return result;
   } catch (err) {
-    throw new Error('Error inserting into cuisines' + err);
+    throw new Error('Error inserting into cuisines ' + err);
   }
 };
 

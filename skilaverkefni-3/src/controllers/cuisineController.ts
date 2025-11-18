@@ -5,6 +5,7 @@ import {
   createCuisine,
   updateCuisine,
   deleteCuisine,
+  getCuisineById,
 } from '../models/cuisineModel';
 
 export const getAllCuisinesController = async (
@@ -17,6 +18,20 @@ export const getAllCuisinesController = async (
   } catch (err) {
     console.log(err);
     res.status(500).json({ Error: 'Failed to fetch cuisines' + err });
+  }
+};
+
+export const getCuisineController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params as { id: string };
+    const cuisines = await getCuisineById(id);
+    res.status(200).json(cuisines);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ Error: 'Failed to fetch cuisine' + err });
   }
 };
 
@@ -40,8 +55,21 @@ export const createCuisineController = async (
 ): Promise<void> => {
   try {
     const { name } = req.body;
-    const cuisines = await createCuisine(name);
-    res.status(201).json(cuisines);
+
+    const cuisines = await getAllCuisines();
+    const cuisine = cuisines.find((cuisine) => {
+      return cuisine.name === name;
+    });
+
+    if (cuisine) {
+      res.status(400).json({
+        error: 'Cuisine already exists',
+        message: `Cuisine with name '${name}' already exists`,
+      });
+    }
+
+    const createCuisines = await createCuisine(name);
+    res.status(201).json(createCuisines);
   } catch (err) {
     console.log(err);
     res.status(500).json({ Error: 'Failed to create a Cuisine' + err });

@@ -6,6 +6,7 @@ import {
   updateRecipe,
   deleteRecipe,
 } from '../models/recipeModel';
+import { getAllCuisines, getCuisineById } from '../models/cuisineModel';
 
 export const getAllRecipesController = async (
   req: Request,
@@ -47,6 +48,16 @@ export const createRecipeController = async (
       rating,
       cuisine_id,
     } = req.body;
+
+    const cuisines = await getCuisineById(cuisine_id);
+    if (!cuisines) {
+      res.status(400).json({
+        error: 'cuisine_id does not match any existing cuisines',
+        message: `Cuisine doesnt exist`,
+      });
+      console.log('ID given doesnt match any of the cuisines')
+    }
+
     const recipe = await createRecipe(
       title,
       description,

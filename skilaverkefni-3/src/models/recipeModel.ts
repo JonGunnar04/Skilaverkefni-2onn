@@ -14,7 +14,7 @@ export interface Recipes {
 // GET all recipes
 export const getAllRecipes = async (): Promise<Recipes[]> => {
   try {
-    const result = pool.query('SELECT * FROM recipes');
+    const result = await pool.query('SELECT * FROM recipes');
     console.log('Recipes fetched from database:', result);
     return result;
   } catch (err) {
@@ -25,7 +25,7 @@ export const getAllRecipes = async (): Promise<Recipes[]> => {
 // GET recipe by id
 export const getRecipeById = async (id: string): Promise<Recipes[]> => {
   try {
-    const result = pool.query(`SELECT * FROM recipes WHERE id = ${id}`);
+    const result = await pool.query(`SELECT * FROM recipes WHERE id = ${id}`);
     console.log('Recipes fetched from database:', result);
     return result;
   } catch (err) {
@@ -43,7 +43,7 @@ export const createRecipe = async (
   cuisine_id: string
 ): Promise<Recipes[]> => {
   try {
-    const result = pool.query(`INSERT INTO recipes (title, description, cook_time_minutes, difficulty, rating, cuisine_id) VALUES ('${title}', '${description}', ${cook_time_minutes}, '${difficulty}', ${rating}, '${cuisine_id}') RETURNING *;`);
+    const result = await pool.query(`INSERT INTO recipes (title, description, cook_time_minutes, difficulty, rating, cuisine_id) VALUES ('${title}', '${description}', ${cook_time_minutes}, '${difficulty}', ${rating}, '${cuisine_id}') RETURNING *;`);
     console.log('Recipes created successfully:', result);
     return result;
   } catch (err) {
@@ -62,7 +62,7 @@ export const updateRecipe = async (
   cuisine_id: string
 ): Promise<Recipes[]> => {
   try {
-    const result = pool.query(`
+    const result = await pool.query(`
 UPDATE recipes SET
     title = '${title}',
     description = '${description}',
@@ -82,7 +82,7 @@ RETURNING *;`);
 // DELETE a recipe
 export const deleteRecipe = async (id: string): Promise<Recipes[]> => {
   try {
-    const result = pool.query(
+    const result = await pool.query(
       `DELETE FROM recipes WHERE id = '${id}' RETURNING *;`
     );
     console.log('Recipe deleted succesfully', result);
