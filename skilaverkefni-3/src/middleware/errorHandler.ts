@@ -17,16 +17,24 @@ export const errorHandler = (
       field: issue.path.join('.'),
       message: issue.message,
     }));
+
+    // One validation issue
+    if (details.length === 1) {
+      return res.status(400).json({
+        error: details[0].message,
+      });
+    }
+
+    // Multiple issues
     return res.status(400).json({
-      status: 400,
-      message: 'Validation failed.',
+      error: 'Validation failed',
       details,
     });
   }
 
-  // Normal errors
+  // Default server error
   res.status(500).json({
-    success: false,
-    err: 'Server error',
+    error: 'Internal server error',
+    message: 'Something went wrong',
   });
 };

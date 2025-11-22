@@ -26,9 +26,19 @@ export const getCuisineController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params as { id: string };
-    const cuisines = await getCuisineById(id);
-    res.status(200).json(cuisines);
+    const id = Number(req.params.id);
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ error: 'Invalid cuisine ID' });
+      return;
+    }
+
+    const cuisine = await getCuisineById(id);
+    if (!cuisine) {
+      res.status(404).json({ error: 'Cuisine not found' });
+      return;
+    }
+
+    res.status(200).json(cuisine);
   } catch (err) {
     console.log(err);
     res.status(500).json({ Error: 'Failed to fetch cuisine' + err });
@@ -40,12 +50,25 @@ export const getRecipesByCuisinesController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params as { id: string };
-    const cuisines = await getRecipesByCuisines(id);
-    res.status(200).json(cuisines);
+    const id = Number(req.params.id);
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ error: 'Invalid cuisine ID' });
+      return;
+    }
+
+    const cuisine = await getCuisineById(id);
+    if (!cuisine) {
+      res.status(404).json({ error: 'Cuisine not found' });
+      return;
+    }
+
+    const recipes = await getRecipesByCuisines(id);
+    res.status(200).json(recipes);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ Error: 'Failed to fetch recipes by cuisine' + err });
+    res
+      .status(500)
+      .json({ Error: 'Failed to fetch recipes by cuisine ' + err });
   }
 };
 
@@ -55,19 +78,17 @@ export const createCuisineController = async (
 ): Promise<void> => {
   try {
     const { name } = req.body;
-
     const cuisines = await getAllCuisines();
     const cuisine = cuisines.find((cuisine) => {
       return cuisine.name === name;
     });
-
     if (cuisine) {
       res.status(400).json({
         error: 'Cuisine already exists',
         message: `Cuisine with name '${name}' already exists`,
       });
+      return;
     }
-
     const createCuisines = await createCuisine(name);
     res.status(201).json(createCuisines);
   } catch (err) {
@@ -81,9 +102,24 @@ export const updateCuisineController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, id } = req.body;
-    const cuisines = await updateCuisine(name, id);
-    res.status(200).json(cuisines);
+    const id = Number(req.params.id);
+    const { name } = req.body;
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ error: 'Invalid cuisine ID' });
+      return;
+    }
+
+    const existingCuisine = await getCuisineById(id);
+    if (!existingCuisine) {
+      res.status(404).json({ error: 'Cuisine not found' });
+      return;
+    }
+    const updated = await updateCuisine(name, id);
+    if (!updated || updated.length === 0) {
+      res.status(404).json({ error: 'Cuisine not found' });
+      return;
+    }
+    res.status(200).json(updated[0]);
   } catch (err) {
     console.log(err);
     res.status(500).json({ Error: 'Failed to update a Cuisine' + err });
@@ -95,9 +131,17 @@ export const deleteCuisineController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { id } = req.params as { id: string };
-    const cuisines = await deleteCuisine(id);
-    res.status(204).json(cuisines);
+    const id = Number(req.params.id);
+    if (isNaN(id) || id <= 0) {
+      res.status(400).json({ error: 'Invalid cuisine ID' });
+      return;
+    }
+    const cuisine = await deleteCuisine(id);
+    if (!cuisine) {
+      res.status(404).json({ error: 'Cuisine not found' });
+      return;
+    }
+    res.status(204).send();
   } catch (err) {
     console.log(err);
     res.status(500).json({ Error: 'Failed to delete a Cuisine' + err });
